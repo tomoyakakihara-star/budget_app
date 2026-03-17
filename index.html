@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="家計管理">
+    <meta name="theme-color" content="#4F46E5">
+    <title>家計管理</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #EFF6FF 0%, #E0E7FF 100%);
+            min-height: 100vh;
+            padding: 20px;
+            padding-top: max(50px, env(safe-area-inset-top));
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding-bottom: 0;
+            padding-top: 220px;
+        }
+
+        .header {
+            background: white;
+            border-radius: 0 0 12px 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            padding: 24px;
+            padding-top: max(24px, calc(24px + env(safe-area-inset-top)));
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            width: 100%;
+            z-index: 101;
+            box-sizing: border-box;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            color: #1F2937;
+        }
+
+        select {
+            padding: 8px 12px;
+            border: 1px solid #D1D5DB;
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+        }
+
+        .summary {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .summary-card {
+            padding: 16px;
+            border-radius: 8px;
+            border: 1px solid #E5E7EB;
+        }
+
+        .summary-card.income {
+            background: #F0FDF4;
+            border-color: #DCFCE7;
+        }
+
+        .summary-card.expense {
+            background: #FEF2F2;
+            border-color: #FECACA;
+        }
+
+        .summary-card.balance {
+            background: #F0F9FF;
+            border-color: #BAE6FD;
+        }
+
+        .summary-label {
+            font-size: 12px;
+            color: #6B7280;
+            margin-bottom: 4px;
+        }
+
+        .summary-amount {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .summary-card.income .summary-amount {
+            color: #16A34A;
+        }
+
+        .summary-card.expense .summary-amount {
+            color: #DC2626;
+        }
+
+        .summary-card.balance .summary-amount {
+            color: #0284C7;
+        }
+
+        .progress-container {
+            background: #F3F4F6;
+            border-radius: 8px;
+            padding: 12px;
+        }
+
+        .progress-label {
+            display: none;
+        }
+
+        .progress-bar {
+            display: none;
+        }
+
+        .progress-fill {
+            display: none;
+        }
+
+        .form-section {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .form-section h2 {
+            font-size: 16px;
+            font-weight: bold;
+            color: #1F2937;
+            margin-bottom: 16px;
+        }
+
+        .type-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .type-button {
+            padding: 16px;
+            border: 2px solid #E5E7EB;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .type-button.expense {
+            color: #DC2626;
+        }
+
+        .type-button.income {
+            color: #16A34A;
+        }
+
+        .type-button.active {
+            border-color: currentColor;
+            background: rgba(59, 130, 246, 0.05);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .type-button.active.expense {
+            border-color: #DC2626;
+            background: rgba(220, 38, 38, 0.05);
+            box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+        }
+
+        .type-button.active.income {
+            border-color: #16A34A;
+            background: rgba(22, 163, 74, 0.05);
+            box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        input, select {
+            padding: 10px;
+            border: 1px solid #D1D5DB;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            ring: 2px;
+            border-color: #3B82F6;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: #3B82F6;
+            color: white;
+            flex: 1;
+        }
+
+        .btn-primary:active {
+            background: #2563EB;
+        }
+
+        .list-section {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .section-header {
+            background: #F9FAFB;
+            padding: 16px 20px;
+            border-bottom: 1px solid #E5E7EB;
+            font-weight: bold;
+            color: #1F2937;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .section-header:active {
+            background: #F3F4F6;
+        }
+
+        .toggle-arrow {
+            font-size: 18px;
+            transition: transform 0.3s ease;
+        }
+
+        .toggle-arrow.collapsed {
+            transform: rotate(-90deg);
+        }
+
+        .section-content {
+            max-height: 2000px;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .section-content.collapsed {
+            max-height: 0;
+        }
+
+        .item {
+            display: flex;
+            gap: 12px;
+            padding: 4px 20px;
+            border-bottom: 1px solid #E5E7EB;
+            align-items: flex-start;
+            cursor: grab;
+        }
+
+        .item:active {
+            cursor: grabbing;
+        }
+
+        .item.dragging {
+            opacity: 0.5;
+            background: #F3F4F6;
+        }
+
+        .item.drag-over {
+            border-top: 3px solid #3B82F6;
+        }
+
+        .item:last-child {
+            border-bottom: none;
+        }
+
+        .item.checked {
+            background: #FFFBEB;
+        }
+
+        .item.income {
+            background: #F0FDF4;
+        }
+
+        .item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-top: 2px;
+            cursor: pointer;
+            accent-color: #F59E0B;
+            flex-shrink: 0;
+        }
+
+        .item-content {
+            flex: 1;
+        }
+
+        .item-name {
+            font-weight: 500;
+            color: #1F2937;
+            margin-bottom: 2px;
+            font-size: 13px;
+        }
+
+        .item.checked .item-name {
+            text-decoration: line-through;
+            color: #9CA3AF;
+        }
+
+        .item-date {
+            font-size: 11px;
+            color: #9CA3AF;
+        }
+
+        .item-amount {
+            font-weight: bold;
+            font-size: 13px;
+            white-space: nowrap;
+            text-align: right;
+        }
+
+        .item.income .item-amount {
+            color: #16A34A;
+        }
+
+        .item:not(.income) .item-amount {
+            color: #DC2626;
+        }
+
+        .btn-edit {
+            background: none;
+            border: none;
+            color: #3B82F6;
+            cursor: pointer;
+            font-size: 18px;
+            padding: 4px 8px;
+            flex-shrink: 0;
+        }
+
+        .btn-delete {
+            background: none;
+            border: none;
+            color: #EF4444;
+            cursor: pointer;
+            font-size: 18px;
+            padding: 4px 8px;
+            flex-shrink: 0;
+        }
+
+        .item-actions {
+            display: flex;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 20px 25px rgba(0,0,0,0.2);
+        }
+
+        .modal-header {
+            font-size: 18px;
+            font-weight: bold;
+            color: #1F2937;
+            margin-bottom: 16px;
+        }
+
+        .modal-field {
+            margin-bottom: 16px;
+        }
+
+        .modal-label {
+            display: block;
+            font-size: 12px;
+            color: #6B7280;
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
+
+        .modal input {
+            width: 100%;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 20px;
+        }
+
+        .modal-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .modal-btn-save {
+            background: #3B82F6;
+            color: white;
+        }
+
+        .modal-btn-save:active {
+            background: #2563EB;
+        }
+
+        .modal-btn-cancel {
+            background: #E5E7EB;
+            color: #1F2937;
+        }
+
+        .modal-btn-cancel:active {
+            background: #D1D5DB;
+        }
+
+        .list-footer {
+            background: #F3F4F6;
+            padding: 16px 20px;
+            border-top: 2px solid #D1D5DB;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .footer-item {
+            text-align: left;
+        }
+
+        .footer-label {
+            font-size: 12px;
+            color: #6B7280;
+            margin-bottom: 4px;
+        }
+
+        .footer-amount {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .footer-item:first-child .footer-amount {
+            color: #F59E0B;
+        }
+
+        .footer-item:last-child .footer-amount {
+            color: #DC2626;
+        }
+
+        @media (max-width: 640px) {
+            body {
+                padding: 16px;
+                padding-top: 40px;
+            }
+
+            .summary {
+                grid-template-columns: 1fr;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .list-footer {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- ヘッダー -->
+        <div class="header">
+            <div class="header-top">
+                <h1>💰 家計管理</h1>
+                <select id="monthSelect">
+                    <option>1月</option>
+                    <option>2月</option>
+                    <option selected>3月</option>
+                    <option>4月</option>
+                    <option>5月</option>
+                    <option>6月</option>
+                    <option>7月</option>
+                    <option>8月</option>
+                    <option>9月</option>
+                    <option>10月</option>
+                    <option>11月</option>
+                    <option>12月</option>
+                </select>
+            </div>
+
+            <!-- サマリーカード -->
+            <div class="summary">
+                <div class="summary-card balance" style="grid-column: 1 / -1;">
+                    <div class="summary-label">残高</div>
+                    <div class="summary-amount" id="balance">¥0</div>
+                </div>
+            </div>
+
+            </div>
+        </div>
+
+        <!-- フォーム -->
+        <div class="form-section">
+            <h2>新規追加</h2>
+            <div class="type-selector">
+                <button class="type-button expense active" onclick="selectType('expense')" id="btn-expense">
+                    💸 支出
+                </button>
+                <button class="type-button income" onclick="selectType('income')" id="btn-income">
+                    💰 収入
+                </button>
+            </div>
+            <div class="form-grid">
+                <input type="text" id="inputDate" placeholder="日付 (3/15)">
+                <input type="text" id="inputName" placeholder="項目名">
+                <input type="number" id="inputAmount" placeholder="金額">
+            </div>
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="addItem()">追加</button>
+            </div>
+        </div>
+
+        <!-- リスト -->
+        <div class="list-section">
+            <!-- 収入セクション -->
+            <div class="section-header" onclick="toggleSection('income-items')">
+                <span>収入</span>
+                <span class="toggle-arrow" id="income-arrow">▼</span>
+            </div>
+            <div class="section-content" id="income-items">
+                <div id="incomeList"></div>
+            </div>
+
+            <!-- 支出セクション -->
+            <div class="section-header" onclick="toggleSection('expense-items')">
+                <span>支出</span>
+                <span class="toggle-arrow" id="expense-arrow">▼</span>
+            </div>
+            <div class="section-content" id="expense-items">
+                <div id="expenseList"></div>
+            </div>
+
+            <div class="list-footer">
+            </div>
+        </div>
+
+        <!-- 編集モーダル -->
+        <div id="editModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">項目を編集</div>
+                <div class="modal-field">
+                    <label class="modal-label">日付</label>
+                    <input type="text" id="editDate" placeholder="3/15">
+                </div>
+                <div class="modal-field">
+                    <label class="modal-label">項目名</label>
+                    <input type="text" id="editName">
+                </div>
+                <div class="modal-field">
+                    <label class="modal-label">金額</label>
+                    <input type="number" id="editAmount">
+                </div>
+                <div class="modal-buttons">
+                    <button class="modal-btn modal-btn-cancel" onclick="closeEditModal()">キャンセル</button>
+                    <button class="modal-btn modal-btn-save" onclick="saveEdit()">保存</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- バックアップ -->
+        <div class="export-section">
+            <h3 style="margin-bottom: 12px; color: #1F2937;">バックアップ</h3>
+            <button class="btn-export" onclick="exportData()">📥 データをダウンロード</button>
+            <button class="btn-danger" onclick="clearAllData()">🗑 すべてクリア</button>
+        </div>
+    </div>
+
+    <script>
+        // 現在選択されているタイプ
+        let currentType = 'expense';
+        let currentMonth = '3月';
+
+        // 月の月末日を取得する関数
+        function getLastDayOfMonth(monthName) {
+            const monthMap = {
+                '1月': 1, '2月': 2, '3月': 3, '4月': 4, '5月': 5, '6月': 6,
+                '7月': 7, '8月': 8, '9月': 9, '10月': 10, '11月': 11, '12月': 12
+            };
+            const month = monthMap[monthName];
+            const year = new Date().getFullYear();
+            const lastDay = new Date(year, month, 0).getDate();
+            return `${month}/${lastDay}`;
+        }
+
+        // 各月のデフォルト項目
+        const createDefaultItems = () => {
+            const months = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'];
+            const defaultItemsObj = {};
+            
+            months.forEach(month => {
+                const lastDay = getLastDayOfMonth(month);
+                defaultItemsObj[month] = [
+                    { name: 'DD顧問', amount: 300000, type: 'income', date: lastDay },
+                    { name: 'チョコレイト', amount: 150000, type: 'income', date: lastDay },
+                    { name: 'パオパオチャンネル', amount: 50000, type: 'income', date: lastDay },
+                    { name: 'かーくん立替', amount: 150000, type: 'income', date: lastDay },
+                    { name: '家賃', amount: -330000, type: 'expense' },
+                    { name: '電気代', amount: -40000, type: 'expense' },
+                    { name: 'その他光熱費', amount: -10000, type: 'expense' },
+                    { name: 'メイ', amount: -30000, type: 'expense' },
+                    { name: 'NISA', amount: -100000, type: 'expense' },
+                    { name: '外貨積立', amount: -10000, type: 'expense' },
+                    { name: '年会費積立', amount: -12000, type: 'expense' },
+                    { name: '奨学金', amount: -20338, type: 'expense' }
+                ];
+            });
+            
+            return defaultItemsObj;
+        };
+        
+        const defaultItems = createDefaultItems();
+
+        // ローカルストレージから復元するか初期データを使う
+        let items = JSON.parse(localStorage.getItem('budgetItems')) || [
+            // 収入（各月月末）
+            { id: 1, date: '1/31', name: 'DD顧問', amount: 300000, type: 'income', checked: false, addedMonth: '1月' },
+            { id: 2, date: '1/31', name: 'チョコレイト', amount: 150000, type: 'income', checked: false, addedMonth: '1月' },
+            { id: 3, date: '1/31', name: 'パオパオチャンネル', amount: 50000, type: 'income', checked: false, addedMonth: '1月' },
+            { id: 4, date: '1/31', name: 'かーくん立替', amount: 150000, type: 'income', checked: false, addedMonth: '1月' },
+            
+            { id: 5, date: '2/28', name: 'DD顧問', amount: 300000, type: 'income', checked: false, addedMonth: '2月' },
+            { id: 6, date: '2/28', name: 'チョコレイト', amount: 150000, type: 'income', checked: false, addedMonth: '2月' },
+            { id: 7, date: '2/28', name: 'パオパオチャンネル', amount: 50000, type: 'income', checked: false, addedMonth: '2月' },
+            { id: 8, date: '2/28', name: 'かーくん立替', amount: 150000, type: 'income', checked: false, addedMonth: '2月' },
+            
+            { id: 9, date: '3/31', name: 'DD顧問', amount: 300000, type: 'income', checked: false, addedMonth: '3月' },
+            { id: 10, date: '3/31', name: 'チョコレイト', amount: 150000, type: 'income', checked: false, addedMonth: '3月' },
+            { id: 11, date: '3/31', name: 'パオパオチャンネル', amount: 50000, type: 'income', checked: false, addedMonth: '3月' },
+            { id: 12, date: '3/31', name: 'かーくん立替', amount: 150000, type: 'income', checked: false, addedMonth: '3月' },
+            
+            // 支出（毎月固定）
+            { id: 100, date: '', name: '家賃', amount: -330000, type: 'expense', checked: false, addedMonth: '1月' },
+            { id: 101, date: '', name: '電気代', amount: -40000, type: 'expense', checked: false, addedMonth: '1月' },
+            { id: 102, date: '', name: 'その他光熱費', amount: -10000, type: 'expense', checked: false, addedMonth: '1月' },
+            { id: 103, date: '', name: 'メイ', amount: -30000, type: 'expense', checked: false, addedMonth: '1月' },
+            { id: 104, date: '', name: 'NISA', amount: -100000, type: 'expense', checked: false, addedMonth: '1月' },
+            { id: 105, date: '', name: '外貨積立', amount: -10000, type: 'expense', checked: false, addedMonth: '1月' },
+            { id: 106, date: '', name: '年会費積立', amount: -12000, type: 'expense', checked: false, addedMonth: '1月' },
+            { id: 107, date: '', name: '奨学金', amount: -20338, type: 'expense', checked: false, addedMonth: '1月' },
+        ];
+
+        function formatCurrency(num) {
+            return new Intl.NumberFormat('ja-JP', {
+                style: 'currency',
+                currency: 'JPY',
+                minimumFractionDigits: 0
+            }).format(num);
+        }
+
+        function saveToLocalStorage() {
+            localStorage.setItem('budgetItems', JSON.stringify(items));
+        }
+
+        function updateDisplay() {
+            // 現在選択されている月に対応するアイテムをフィルタリング
+            const monthMap = {
+                '1月': 1, '2月': 2, '3月': 3, '4月': 4, '5月': 5, '6月': 6,
+                '7月': 7, '8月': 8, '9月': 9, '10月': 10, '11月': 11, '12月': 12
+            };
+            const selectedMonth = monthMap[currentMonth];
+
+            const getMonthFromDate = (dateStr) => {
+                if (!dateStr) return null;
+                const month = parseInt(dateStr.split('/')[0]);
+                return month;
+            };
+
+            // ユーザーが追加した項目をフィルタリング
+            const userItems = items.filter(item => {
+                const itemMonth = getMonthFromDate(item.date);
+                // 日付がある場合はその月で判定
+                if (itemMonth) {
+                    return itemMonth === selectedMonth;
+                }
+                // 日付がない場合は、addedMonthで判定
+                return item.addedMonth === currentMonth;
+            });
+
+            // デフォルト項目とユーザー項目を結合
+            const monthDefaults = defaultItems[currentMonth] || [];
+            const defaultItemsWithId = monthDefaults.map((item, index) => ({
+                id: `default-${currentMonth}-${index}`,
+                date: item.date || '',
+                name: item.name,
+                amount: item.amount,
+                type: item.type,
+                checked: false,
+                addedMonth: currentMonth,
+                isDefault: true
+            }));
+
+            // ユーザーが追加した項目は残し、デフォルト項目を追加
+            const allItems = [...defaultItemsWithId, ...userItems];
+
+            const totalIncome = allItems
+                .filter(item => item.amount > 0)
+                .reduce((sum, item) => sum + item.amount, 0);
+
+            const totalExpense = allItems
+                .filter(item => item.amount < 0)
+                .reduce((sum, item) => sum + item.amount, 0);
+
+            const balance = totalIncome + totalExpense;
+
+            // 残高更新
+            document.getElementById('balance').textContent = formatCurrency(balance);
+
+            // 支出リスト更新（未チェック → チェック済みの順）
+            const expenseItems = allItems.filter(item => item.amount < 0);
+            const uncheckedExpenses = expenseItems.filter(item => !item.checked);
+            const checkedExpenses = expenseItems.filter(item => item.checked);
+            const sortedExpenseItems = [...uncheckedExpenses, ...checkedExpenses];
+            const expenseHTML = sortedExpenseItems.map(item => createItemHTML(item)).join('');
+            document.getElementById('expenseList').innerHTML = expenseHTML || '<div style="padding: 16px 20px; color: #9CA3AF; text-align: center;">支出がありません</div>';
+
+            // 収入リスト更新（未チェック → チェック済みの順）
+            const incomeItems = allItems.filter(item => item.amount > 0);
+            const uncheckedIncomes = incomeItems.filter(item => !item.checked);
+            const checkedIncomes = incomeItems.filter(item => item.checked);
+            const sortedIncomeItems = [...uncheckedIncomes, ...checkedIncomes];
+            const incomeHTML = sortedIncomeItems.map(item => createItemHTML(item)).join('');
+            document.getElementById('incomeList').innerHTML = incomeHTML || '<div style="padding: 16px 20px; color: #9CA3AF; text-align: center;">収入がありません</div>';
+        }
+
+        function createItemHTML(item) {
+            return `
+                <div class="item ${item.amount > 0 ? 'income' : ''}" draggable="true" data-item-id="${item.id}" 
+                    ondragstart="handleDragStart(event)" 
+                    ondragover="handleDragOver(event)"
+                    ondrop="handleDrop(event)"
+                    ondragleave="handleDragLeave(event)"
+                    ondragend="handleDragEnd(event)">
+                    <input type="checkbox" ${item.checked ? 'checked' : ''} 
+                        onchange="toggleCheck(${item.id})">
+                    <div class="item-content">
+                        <div class="item-name">${item.name}</div>
+                        ${item.date ? `<div class="item-date">${item.date}</div>` : ''}
+                    </div>
+                    <div class="item-amount">
+                        ${item.amount > 0 ? '+' : ''}${formatCurrency(item.amount)}
+                    </div>
+                    <div class="item-actions">
+                        <button class="btn-edit" onclick="openEditModal(${item.id})" title="編集">✏️</button>
+                        <button class="btn-delete" onclick="deleteItem(${item.id})">✕</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function toggleSection(sectionId) {
+            const section = document.getElementById(sectionId);
+            const arrow = document.getElementById(sectionId.replace('-items', '-arrow'));
+            
+            section.classList.toggle('collapsed');
+            arrow.classList.toggle('collapsed');
+        }
+
+        function addItem() {
+            const date = document.getElementById('inputDate').value;
+            const name = document.getElementById('inputName').value;
+            const amount = parseInt(document.getElementById('inputAmount').value) || 0;
+            const type = currentType;
+
+            if (!name || amount === 0) {
+                alert('項目名と金額を入力してください');
+                return;
+            }
+
+            items.push({
+                id: Date.now(),
+                date: date,
+                name: name,
+                amount: type === 'income' ? amount : -amount,
+                type: type,
+                checked: false,
+                addedMonth: currentMonth  // 追加された月を記録
+            });
+
+            document.getElementById('inputDate').value = '';
+            document.getElementById('inputName').value = '';
+            document.getElementById('inputAmount').value = '';
+
+            saveToLocalStorage();
+            updateDisplay();
+        }
+
+        function selectType(type) {
+            currentType = type;
+            document.getElementById('btn-expense').classList.toggle('active', type === 'expense');
+            document.getElementById('btn-income').classList.toggle('active', type === 'income');
+        }
+
+        function toggleCheck(id) {
+            const item = items.find(i => i.id === id);
+            if (item) {
+                item.checked = !item.checked;
+                saveToLocalStorage();
+                updateDisplay();
+            }
+        }
+
+        function deleteItem(id) {
+            items = items.filter(item => item.id !== id);
+            saveToLocalStorage();
+            updateDisplay();
+        }
+
+        let editingItemId = null;
+
+        function openEditModal(id) {
+            editingItemId = id;
+            const item = items.find(i => i.id === id);
+            if (item) {
+                document.getElementById('editDate').value = item.date;
+                document.getElementById('editName').value = item.name;
+                document.getElementById('editAmount').value = Math.abs(item.amount);
+                document.getElementById('editModal').classList.add('show');
+            }
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModal').classList.remove('show');
+            editingItemId = null;
+        }
+
+        function saveEdit() {
+            if (!editingItemId) return;
+            
+            const item = items.find(i => i.id === editingItemId);
+            if (item) {
+                item.date = document.getElementById('editDate').value;
+                item.name = document.getElementById('editName').value;
+                const amount = parseInt(document.getElementById('editAmount').value) || 0;
+                
+                if (item.amount > 0) {
+                    item.amount = amount;
+                } else {
+                    item.amount = -amount;
+                }
+                
+                saveToLocalStorage();
+                updateDisplay();
+                closeEditModal();
+            }
+        }
+
+        let draggedItemId = null;
+        let draggedFromContainer = null;
+
+        function handleDragStart(event) {
+            draggedItemId = parseInt(event.target.closest('.item').dataset.itemId);
+            draggedFromContainer = event.target.closest('.section-content').id;
+            event.target.closest('.item').classList.add('dragging');
+            event.dataTransfer.effectAllowed = 'move';
+        }
+
+        function handleDragOver(event) {
+            event.preventDefault();
+            event.dataTransfer.dropEffect = 'move';
+            const item = event.target.closest('.item');
+            if (item && draggedItemId !== parseInt(item.dataset.itemId)) {
+                item.classList.add('drag-over');
+            }
+        }
+
+        function handleDragLeave(event) {
+            const item = event.target.closest('.item');
+            if (item) {
+                item.classList.remove('drag-over');
+            }
+        }
+
+        function handleDrop(event) {
+            event.preventDefault();
+            const dropTarget = event.target.closest('.item');
+            
+            if (dropTarget && draggedItemId) {
+                const draggedIndex = items.findIndex(i => i.id === draggedItemId);
+                const dropIndex = items.findIndex(i => i.id === parseInt(dropTarget.dataset.itemId));
+                
+                if (draggedIndex !== -1 && dropIndex !== -1) {
+                    // 同じセクション内でのみ移動可能
+                    const draggedItem = items[draggedIndex];
+                    const dropItem = items[dropIndex];
+                    
+                    const sameSection = (draggedItem.amount > 0 && dropItem.amount > 0) || 
+                                       (draggedItem.amount < 0 && dropItem.amount < 0);
+                    
+                    if (sameSection) {
+                        [items[draggedIndex], items[dropIndex]] = [items[dropIndex], items[draggedIndex]];
+                        saveToLocalStorage();
+                        updateDisplay();
+                    }
+                }
+            }
+            
+            document.querySelectorAll('.item').forEach(item => {
+                item.classList.remove('drag-over');
+            });
+        }
+
+        function handleDragEnd(event) {
+            document.querySelectorAll('.item').forEach(item => {
+                item.classList.remove('dragging', 'drag-over');
+            });
+            draggedItemId = null;
+            draggedFromContainer = null;
+        }
+
+        // 初期表示
+        updateDisplay();
+
+        // 月選択イベント
+        document.getElementById('monthSelect').addEventListener('change', (e) => {
+            currentMonth = e.target.value;
+            updateDisplay();
+        });
+
+        // モーダルの外側をクリックで閉じる
+        document.getElementById('editModal').addEventListener('click', (e) => {
+            if (e.target.id === 'editModal') {
+                closeEditModal();
+            }
+        });
+
+        // EnterキーでアイテムAdd
+        document.getElementById('inputAmount').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') addItem();
+        });
+    </script>
+</body>
+</html>
